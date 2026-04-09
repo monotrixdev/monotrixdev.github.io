@@ -18,7 +18,7 @@ I build fast, interactive web apps using **Next.js**, **React**, and **Node.js**
 Here are some of my recent projects:
 
 - **[Instagram PHP Scraper](https://github.com/monotrixdev/instagram-php-scraper)** – Scrapes Instagram data with PHP  
-- **[Next.js Portfolio](https://monotrixdev.github.io)** – My personal portfolio website  
+- **[Sabbir Ahmed Portfolio](https://monotrixdev.github.io)** – My personal portfolio website  
 
 ## Contact
 - GitHub: [monotrixdev](https://github.com/monotrixdev)  
