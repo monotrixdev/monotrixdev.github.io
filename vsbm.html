@@ -1,77 +1,779 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="user-scalable=no">
-    <title>volumeshader_bm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Monotrix Performance Benchmark</title>
     <style>
-        body {
-            background: #131115;
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Outfit:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #08060a;
+            --neon-blue: #00f0ff;
+            --neon-purple: #bd00ff;
+            --neon-pink: #ff005b;
+            --neon-green: #39ff14;
+            --glass-bg: rgba(13, 10, 20, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Outfit', sans-serif;
+            color: #fbf7fe;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 3D WebGL Canvas */
         #c1 {
-            background: #fbf7fe;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            display: block;
         }
+
+        /* 2D Overlay Canvas */
+        #c2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            pointer-events: none;
+            display: block;
+        }
+
+        /* Glassmorphism Overlays */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(8, 6, 10, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .glass-dialog {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 24px;
+            padding: 45px 40px;
+            max-width: 500px;
+            width: 85%;
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.75), 
+                        inset 0 1px 1px rgba(255, 255, 255, 0.15),
+                        0 0 40px rgba(189, 0, 255, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transform: scale(0.95);
+            opacity: 0;
+            animation: dialogAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes dialogAppear {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Dynamic Glowing Neon Border */
+        .glass-dialog::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 24px;
+            padding: 1.5px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-pink), var(--neon-purple), var(--neon-blue));
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            animation: borderGlowMove 6s linear infinite;
+        }
+
+        @keyframes borderGlowMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Dialog Title Icon & Typography */
+        .dialog-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            animation: pulseGlow 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.4)); }
+            100% { transform: scale(1.08); filter: drop-shadow(0 0 25px rgba(189, 0, 255, 0.8)); }
+        }
+
+        .bengali-title {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            background: linear-gradient(135deg, #ffffff 0%, #e6def0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .bengali-desc {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #d8cde3;
+            margin: 0 0 20px 0;
+            font-weight: 400;
+        }
+
+        .bengali-subdesc {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 14px;
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin: 0 0 30px 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* Start Button with Sweep and Glare */
+        .start-btn {
+            background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%);
+            border: none;
+            color: white;
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 25px rgba(189, 0, 255, 0.45);
+        }
+
+        .start-btn span {
+            position: relative;
+            z-index: 2;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: all 0.6s ease;
+            z-index: 1;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.7), 0 0 20px rgba(189, 0, 255, 0.7);
+        }
+
+        .start-btn:hover::before {
+            left: 100%;
+        }
+
+        .start-btn:active {
+            transform: translateY(1px) scale(0.97);
+        }
+
+        /* Loading Screen styles */
+        .loading-container {
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .glitch-text {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: white;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            margin-bottom: 10px;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .loading-status {
+            font-size: 12px;
+            color: var(--neon-purple);
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            box-shadow: 0 0 10px var(--neon-blue);
+            border-radius: 3px;
+        }
+
+        .mock-console {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 16px 20px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+            height: 100px;
+            overflow-y: hidden;
+            line-height: 1.6;
+        }
+
+        .mock-line {
+            margin: 0;
+            opacity: 0;
+            animation: fadeInLine 0.2s forwards;
+        }
+
+        @keyframes fadeInLine {
+            to { opacity: 1; }
+        }
+
+        /* Real-Time Stats HUD */
+        .hud-overlay {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            right: 24px;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(13, 10, 20, 0.7);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 12px 24px;
+        }
+
+        .hud-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .hud-phase {
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--neon-blue);
+            letter-spacing: 1px;
+        }
+
+        .hud-stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .hud-stat-box {
+            background: rgba(13, 10, 20, 0.7);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #8c829c;
+            margin-bottom: 6px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .stat-val {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .hud-status-log {
+            background: rgba(13, 10, 20, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            height: 48px;
+            overflow: hidden;
+            max-width: 320px;
+        }
+
+        @media (max-width: 600px) {
+            .hud-stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .hud-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        /* Results Screen Overlays */
+        .results-card {
+            max-width: 620px;
+            width: 90%;
+            padding: 35px 40px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 15px;
+        }
+
+        .results-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin: 0;
+        }
+
+        .grade-badge {
+            background: linear-gradient(135deg, var(--neon-pink) 0%, var(--neon-purple) 100%);
+            color: white;
+            font-size: 32px;
+            font-weight: 800;
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 25px rgba(255, 0, 91, 0.5);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .result-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .res-label {
+            font-size: 10px;
+            color: #8c829c;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .res-val {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .chart-container {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 28px;
+            height: 160px;
+            position: relative;
+        }
+
+        #fpsChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .run-again {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .run-again:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .download-results {
+            background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .download-results:hover {
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.55);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .results-actions {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Original Config panel (hidden, styled Cyberpunk) */
         #btn {
             position: fixed;
-            left: 0px;
-            top: 0px;
+            right: 20px;
+            bottom: 20px;
+            z-index: 100;
+            background: rgba(13, 10, 20, 0.6);
+            border: 1px solid var(--glass-border);
+            color: #8c829c;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-        #c1 {
-            position: fixed;
-            left: 0px;
-            top: 0px;
+
+        #btn:hover {
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
         }
-        #main {
-            transform-origin: 0px 0px;
-            position: fixed;
-            left: 0px;
-            top: 0px;
-        }
+
         #config {
             position: fixed;
-            left: 0px;
-            top: 30px;
+            right: 20px;
+            bottom: 54px;
+            z-index: 100;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 16px;
+            width: 280px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             display: none;
+        }
+
+        #config textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            color: var(--neon-green);
+            font-family: monospace;
+            font-size: 11px;
+            padding: 8px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        #config button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        #config button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        #apply {
+            border-color: var(--neon-green) !important;
+            color: var(--neon-green) !important;
         }
     </style>
 </head>
-<body style="overflow-x:hidden;overflow-y:hidden">
-<div id="main">
-    <canvas id="c1" width="1024" height="1024">
-        <span>不支持canvas浏览器</span>
-    </canvas>
-</div>
+<body>
+
+    <!-- 3D Raymarched WebGL Canvas -->
+    <canvas id="c1"></canvas>
+    
+    <!-- 2D Overlays Canvas (particles, titles) -->
+    <canvas id="c2"></canvas>
+
+    <!-- STEP 1 - Premium Bengali Startup Dialog -->
+    <div class="overlay" id="startupOverlay">
+        <div class="glass-dialog">
+            <div class="dialog-icon">⚡</div>
+            <h1 class="bengali-title">পারফরম্যান্স যাচাইকরণ</h1>
+            <p class="bengali-desc">
+                আপনার ডিভাইসের Graphics Rendering, GPU Performance এবং Rendering Stability পরীক্ষা করার জন্য একটি উন্নত Benchmark চালু হবে।
+            </p>
+            <p class="bengali-subdesc">
+                সেরা অভিজ্ঞতার জন্য "শুরু করুন" বোতামে ক্লিক করুন।
+            </p>
+            <button class="start-btn" id="startBtn">
+                <span>🚀 শুরু করুন</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- STEP 2 - Loading Transition Overlay -->
+    <div class="overlay" id="loadingOverlay" style="display: none; opacity: 0;">
+        <div class="loading-container">
+            <div class="glitch-text">MONOTRIX GRAPHICS</div>
+            <div class="loading-status" id="loadingStatus">Initializing stress pipelines...</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="mock-console" id="mockConsole"></div>
+        </div>
+    </div>
+
+    <!-- Live Stats HUD Overlay -->
+    <div class="hud-overlay" id="hudOverlay">
+        <div class="hud-header">
+            <div class="hud-title">⚡ MONOTRIX CORE STRESS DETECTOR</div>
+            <div class="hud-phase" id="hudPhase">PHASE 1: LOGO REVEAL & SYSTEM INITIALIZATION</div>
+        </div>
+        <div class="hud-stats-container">
+            <div class="hud-stat-box">
+                <div class="stat-label">FPS</div>
+                <div class="stat-val neon-blue" id="hudFps">--</div>
+            </div>
+            <div class="hud-stat-box">
+                <div class="stat-label">Avg FPS</div>
+                <div class="stat-val neon-purple" id="hudAvgFps">--</div>
+            </div>
+            <div class="hud-stat-box">
+                <div class="stat-label">Frame Time</div>
+                <div class="stat-val neon-pink" id="hudFrameTime">-- ms</div>
+            </div>
+            <div class="hud-stat-box">
+                <div class="stat-label">Benchmark Score</div>
+                <div class="stat-val neon-green" id="hudScore">0</div>
+            </div>
+        </div>
+        <div class="hud-status-log" id="hudLog"></div>
+    </div>
+
+    <!-- Final Cinematic Results Overlay -->
+    <div class="overlay" id="resultsOverlay" style="display: none; opacity: 0;">
+        <div class="glass-dialog results-card">
+            <div class="results-header">
+                <h1 class="results-title">BENCHMARK COMPLETE</h1>
+                <div class="grade-badge" id="resGrade">A</div>
+            </div>
+            <div class="results-grid">
+                <div class="result-item">
+                    <span class="res-label">Overall Score</span>
+                    <span class="res-val neon-green" id="resOverallScore">0</span>
+                </div>
+                <div class="result-item">
+                    <span class="res-label">Graphics Score</span>
+                    <span class="res-val neon-blue" id="resGraphicsScore">0</span>
+                </div>
+                <div class="result-item">
+                    <span class="res-label">Shader Score</span>
+                    <span class="res-val neon-purple" id="resShaderScore">0</span>
+                </div>
+                <div class="result-item">
+                    <span class="res-label">Average FPS</span>
+                    <span class="res-val" id="resAvgFps">0</span>
+                </div>
+                <div class="result-item">
+                    <span class="res-label">Minimum FPS</span>
+                    <span class="res-val" id="resMinFps">0</span>
+                </div>
+                <div class="result-item">
+                    <span class="res-label">Maximum FPS</span>
+                    <span class="res-val" id="resMaxFps">0</span>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="fpsChart"></canvas>
+            </div>
+            
+            <div class="results-actions">
+                <button class="action-btn run-again" id="runAgainBtn">
+                    <span>🔄 Run Again</span>
+                </button>
+                <button class="action-btn download-results" id="downloadBtn">
+                    <span>💾 Download Results</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Original Hidden Config Panel -->
     <button id="btn">CONFIG</button>
     <div id="config">
-        <textarea name="" id="kernel" cols="30" rows="10"></textarea>
+        <textarea id="kernel" cols="30" rows="10"></textarea>
         <br />
         <button id="apply">APPLY</button>
         <button id="cancle">CANCLE</button>
     </div>
+
     <script>
-alert("trigonometric and inverse trigonometric functions test.\ncreated by cznull@bilibili");
-    var cx, cy;
-    var glposition;
-    var glright;
-    var glforward;
-    var glup;
-    var glorigin;
-    var glx;
-    var gly;
-    var gllen;
-    var canvas;
-    var gl;
-    var date = new Date();
-    var md = 0,mx,my;
-    var t2,t1 = date.getTime();
-    var mx = 0, my = 0, mx1 = 0, my1 = 0, lasttimen = 0;
-    var ml = 0, mr = 0, mm = 0;
-    var len = 1.6;
-    var ang1 = 2.8;
-    var ang2 = 0.4;
-    var cenx = 0.0;
-    var ceny = 0.0;
-    var cenz = 0.0;
-        var KERNEL = "float kernal(vec3 ver){\n" +
+        // State Constants
+        const STATE_IDLE = 0;
+        const STATE_LOADING = 1;
+        const STATE_BENCHMARK = 2;
+        const STATE_RESULTS = 3;
+
+        let currentState = STATE_IDLE;
+        let benchmarkStartTime = 0;
+        let lastFrameTime = 0;
+        let framesThisSecond = 0;
+        let lastFpsUpdate = 0;
+        
+        // Stats
+        let fpsHistory = [];
+        let instantFps = 60;
+        let averageFps = 0;
+        let minFps = 9999;
+        let maxFps = 0;
+        let frameTime = 16.6;
+        let benchmarkScore = 0;
+        let totalFramesRendered = 0;
+        
+        let ph1FpsSum = 0, ph1Frames = 0;
+        let ph2FpsSum = 0, ph2Frames = 0;
+        let ph3FpsSum = 0, ph3Frames = 0;
+        let ph4FpsSum = 0, ph4Frames = 0;
+
+        // WebGL Globals
+        let canvas, gl;
+        let shaderProgram;
+        let vertshader, fragshader;
+        let glposition, glright, glforward, glup, glorigin, glx, gly, gllen;
+        
+        // Uniforms for new Cyberpunk features
+        let uTimeLoc, uComplexityLoc, uFogLoc, uGlowLoc, uColorShiftLoc;
+        
+        // Shader parameters
+        let currentComplexity = 0.25;
+        let currentFog = 0.1;
+        let currentGlow = 0.5;
+        let currentColorShift = 0.0;
+
+        // Camera settings
+        let len = 3.5;
+        let ang1 = 2.8;
+        let ang2 = 0.4;
+        let cenx = 0.0;
+        let ceny = 0.0;
+        let cenz = 0.0;
+
+        // Audio Object
+        let bgAudio = new Audio('audio/prank.mp3');
+        bgAudio.loop = true;
+
+        // Floating particles on Overlay Canvas (c2)
+        const canvas2 = document.getElementById('c2');
+        const ctx2 = canvas2.getContext('2d');
+        let particles = [];
+        
+        // Original Mandelbox fractal Kernel code
+        let KERNEL = "float kernal(vec3 ver){\n" +
             "   vec3 a;\n" +
             "float b,c,d,e;\n" +
             "   a=ver;\n" +
@@ -88,186 +790,9 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             "   }" +
             "   return 4.0-a.x*a.x-a.y*a.y-a.z*a.z;" +
             "}";
-    var vertshade;
-    var fragshader;
-    var shaderProgram;
-    function ontimer() {
-        ang1+=0.01;
-        draw();
-        window.requestAnimationFrame(ontimer);
-    }
-    document.addEventListener("mousedown",
-        function (ev) {
-            var oEvent = ev || event;
-            if (oEvent.button == 0) {
-                ml = 1;
-                mm = 0;
-            }
-            if (oEvent.button == 2) {
-                mr = 1;
-                mm = 0;
-            }
-            mx = oEvent.clientX;
-            my = oEvent.clientY;
-        },
-        false);
-    document.addEventListener("mouseup",
-        function (ev) {
-            var oEvent = ev || event;
-            if (oEvent.button == 0) {
-                ml = 0;
-            }
-            if (oEvent.button == 2) {
-                mr = 0;
-            }
-        },
-        false);
-    document.addEventListener("mousemove",
-        function (ev) {
-        var oEvent = ev || event;
-        if (ml == 1) {
-            ang1 += (oEvent.clientX - mx) * 0.002;
-            ang2 += (oEvent.clientY - my) * 0.002;
-            if (oEvent.clientX != mx || oEvent.clientY != my) {
-                mm = 1;
-            }
-        }
-        if (mr == 1) {
-            var l = len * 4.0 / (cx + cy);
-            cenx += l * (-(oEvent.clientX - mx) * Math.sin(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.cos(ang1));
-            ceny += l * ((oEvent.clientY - my) * Math.cos(ang2));
-            cenz += l * ((oEvent.clientX - mx) * Math.cos(ang1) - (oEvent.clientY - my) * Math.sin(ang2) * Math.sin(ang1));
-            if (oEvent.clientX != mx || oEvent.clientY != my) {
-                mm = 1;
-            }
-        }
-        mx = oEvent.clientX;
-        my = oEvent.clientY;
-        },
-        false);
-    document.addEventListener("mousewheel",
-        function (ev) {
-            ev.preventDefault();
-            var oEvent = ev || event;
-            len *= Math.exp(-0.001 * oEvent.wheelDelta);
-        },
-        false);
-    document.addEventListener("touchstart",
-        function (ev) {
-            var n = ev.touches.length;
-            if (n == 1) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            }
-            else if (n == 2) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-                oEvent = ev.touches[1];
-                mx1 = oEvent.clientX;
-                my1 = oEvent.clientY;
-            }
-            lasttimen = n;
-        },
-        false);
-    document.addEventListener("touchend",
-        function (ev) {
-            var n = ev.touches.length;
-            if (n == 1) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            }
-            else if (n == 2) {
-                var oEvent = ev.touches[0];
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-                oEvent = ev.touches[1];
-                mx1 = oEvent.clientX;
-                my1 = oEvent.clientY;
-            }
-            lasttimen = n;
-        },
-        false);
-    document.addEventListener("touchmove",
-        function (ev) {
-            ev.preventDefault();
-            var n = ev.touches.length;
-            if (n == 1&&lasttimen==1) {
-                var oEvent = ev.touches[0];
-                ang1 += (oEvent.clientX - mx) * 0.002;
-                ang2 += (oEvent.clientY - my) * 0.002;
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-            }
-            else if (n == 2) {
-                var oEvent = ev.touches[0];
-                var oEvent1 = ev.touches[1];
-                var l = len * 2.0 / (cx + cy), l1;
-                cenx += l * (-(oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.sin(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.cos(ang1));
-                ceny += l * ((oEvent.clientY + oEvent1.clientY - my - my1) * Math.cos(ang2));
-                cenz += l * ((oEvent.clientX + oEvent1.clientX - mx - mx1) * Math.cos(ang1) - (oEvent.clientY + oEvent1.clientY - my - my1) * Math.sin(ang2) * Math.sin(ang1));
-                l1 = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1)+1.0);
-                mx = oEvent.clientX;
-                my = oEvent.clientY;
-                mx1 = oEvent1.clientX;
-                my1 = oEvent1.clientY;
-                l = Math.sqrt((mx - mx1) * (mx - mx1) + (my - my1) * (my - my1) + 1.0);
-                len *= l1 / l;
-            }
-            lasttimen = n;
-        },
-        false);
-    document.oncontextmenu = function (event) {
-        if (mm == 1) {
-            event.preventDefault();
-        }
-    };
-    function draw() {
-        date = new Date();
-        var t2 = date.getTime();
-        //ang1 += (t2 - t1)*0.001;
-        t1 = t2;
-        //ang1 += 0.1;
-        gl.uniform1f(glx, cx * 2.0 / (cx + cy));
-        gl.uniform1f(gly, cy * 2.0 / (cx + cy));
-        gl.uniform1f(gllen, len);
-        gl.uniform3f(glorigin, len * Math.cos(ang1) * Math.cos(ang2) + cenx, len * Math.sin(ang2) + ceny, len * Math.sin(ang1) * Math.cos(ang2) + cenz);
-        gl.uniform3f(glright, Math.sin(ang1), 0, -Math.cos(ang1));
-        gl.uniform3f(glup, -Math.sin(ang2) * Math.cos(ang1), Math.cos(ang2), -Math.sin(ang2) * Math.sin(ang1));
-        gl.uniform3f(glforward, -Math.cos(ang1) * Math.cos(ang2), -Math.sin(ang2), -Math.sin(ang1) * Math.cos(ang2));
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-        gl.finish();
-    }
-    window.onresize = function () {
-        cx = document.body.clientWidth;
-        cy = document.body.clientHeight;
-        if(cx>cy){
-            cx=cy;
-        }
-        else{
-            cy=cx;
-        }
-        document.getElementById("main").style.width=1024+"px";
-        document.getElementById("main").style.height=1024+"px";
-        document.getElementById("main").style.transform="scale("+cx/1024+","+cy/1024+")";
-    }
-    window.onload = function () {
-        cx = document.body.clientWidth;
-        cy = document.body.clientHeight;
-        if(cx>cy){
-            cx=cy;
-        }
-        else{
-            cy=cx;
-        }
-        document.getElementById("main").style.width=1024+"px";
-        document.getElementById("main").style.height=1024+"px";
-        document.getElementById("main").style.transform="scale("+cx/1024+","+cy/1024+")";
-        var positions = [-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, 1.0, 0.0];
-        var VSHADER_SOURCE =
-            "#version 100 \n"+
+
+        const VSHADER_SOURCE =
+            "#version 100 \n" +
             "precision highp float;\n" +
             "attribute vec4 position;" +
             "varying vec3 dir, localdir;" +
@@ -280,7 +805,9 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             "   localdir.y = position.y*y;" +
             "   localdir.z = -1.0;" +
             "} ";
-        var FSHADER_SOURCE =
+
+        // Modernized Fragment Shader with Volumetric Fog, Fresnel Neon Glows, and Cosmic nebulae background
+        const FSHADER_SOURCE =
             "#version 100 \n" +
             "#define PI 3.14159265358979324\n" +
             "#define M_L 0.3819660113\n" +
@@ -288,25 +815,41 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             "#define MAXR 8\n" +
             "#define SOLVER 8\n" +
             "precision highp float;\n" +
-            "float kernal(vec3 ver)\n;" +
+            
+            "float kernal(vec3 ver);\n" +
+            
             "uniform vec3 right, forward, up, origin;\n" +
             "varying vec3 dir, localdir;\n" +
             "uniform float len;\n" +
+            
+            // New dynamic uniforms
+            "uniform float u_time;\n" +
+            "uniform float u_complexity;\n" +
+            "uniform float u_fog;\n" +
+            "uniform float u_glow;\n" +
+            "uniform float u_color_shift;\n" +
+            
             "vec3 ver;\n" +
-            "int sign;"+
+            "int sign;\n" +
             "float v, v1, v2;\n" +
             "float r1, r2, r3, r4, m1, m2, m3, m4;\n" +
             "vec3 n, reflect;\n" +
             "const float step = 0.002;\n" +
             "vec3 color;\n" +
+            
             "void main() {\n" +
             "   color.r=0.0;\n" +
             "   color.g=0.0;\n" +
             "   color.b=0.0;\n" +
-            "   sign=0;"+
+            "   sign=0;\n" +
             "   v1 = kernal(origin + dir * (step*len));\n" +
             "   v2 = kernal(origin);\n" +
+            
+            // Scaled loop steps base on u_complexity (Early loop breaks reduce workload dynamically)
+            "   float maxK = 15.0 + u_complexity * 985.0;\n" +
             "   for (int k = 2; k < 1002; k++) {\n" +
+            "      if (float(k) > maxK) break;\n" +
+            
             "      ver = origin + dir * (step*len*float(k));\n" +
             "      v = kernal(ver);\n" +
             "      if (v > 0.0 && v1 < 0.0) {\n" +
@@ -327,7 +870,7 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             "            }\n" +
             "         }\n" +
             "         if (r3 < 2.0 * len) {\n" +
-            "               sign=1;" +
+            "               sign=1;\n" +
             "            break;\n" +
             "         }\n" +
             "      }\n" +
@@ -372,7 +915,7 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             "               }\n" +
             "            }\n" +
             "            if (r3 < 2.0 * len&&r3> step*len) {\n" +
-            "                   sign=1;" +
+            "                   sign=1;\n" +
             "               break;\n" +
             "            }\n" +
             "         }\n" +
@@ -394,7 +937,7 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             "               }\n" +
             "            }\n" +
             "            if (r3 < 2.0 * len&&r3> step*len) {\n" +
-            "                   sign=1;" +
+            "                   sign=1;\n" +
             "               break;\n" +
             "            }\n" +
             "         }\n" +
@@ -402,12 +945,17 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             "      v2 = v1;\n" +
             "      v1 = v;\n" +
             "   }\n" +
+            
+            // Pixel Shading
             "   if (sign==1) {\n" +
-            "      ver = origin + dir*r3 ;\n" +
-                "       r1=ver.x*ver.x+ver.y*ver.y+ver.z*ver.z;" +
-            "      n.x = kernal(ver - right * (r3*0.00025)) - kernal(ver + right * (r3*0.00025));\n" +
-            "      n.y = kernal(ver - up * (r3*0.00025)) - kernal(ver + up * (r3*0.00025));\n" +
-            "      n.z = kernal(ver + forward * (r3*0.00025)) - kernal(ver - forward * (r3*0.00025));\n" +
+            "      ver = origin + dir*r3;\n" +
+            "      float rayDist = r3;\n" +
+            "      r1=ver.x*ver.x+ver.y*ver.y+ver.z*ver.z;\n" +
+            
+            "      n.x = kernal(ver - right * (rayDist*0.00025)) - kernal(ver + right * (rayDist*0.00025));\n" +
+            "      n.y = kernal(ver - up * (rayDist*0.00025)) - kernal(ver + up * (rayDist*0.00025));\n" +
+            "      n.z = kernal(ver + forward * (rayDist*0.00025)) - kernal(ver - forward * (rayDist*0.00025));\n" +
+            
             "      r3 = n.x*n.x+n.y*n.y+n.z*n.z;\n" +
             "      n = n * (1.0 / sqrt(r3));\n" +
             "      ver = localdir;\n" +
@@ -418,67 +966,215 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             "      r4 = n.x*0.276+n.y*0.920+n.z*0.276;\n" +
             "      r3 = max(0.0,r3);\n" +
             "      r3 = r3 * r3*r3*r3;\n" +
-            "      r3 = r3 * 0.45 + r4 * 0.25 + 0.3;\n" +
-                "      n.x = sin(r1*10.0)*0.5+0.5;\n" +
-                "      n.y = sin(r1*10.0+2.05)*0.5+0.5;\n" +
-                "      n.z = sin(r1*10.0-2.05)*0.5+0.5;\n" +
-            "      color = n*r3;\n" +
+            "      float lighting = r3 * 0.45 + r4 * 0.25 + 0.3;\n" +
+            
+            // Cyberpunk color palettes
+            "      vec3 neonBlue = vec3(0.0, 0.55, 1.0);\n" +
+            "      vec3 neonPurple = vec3(0.68, 0.0, 1.0);\n" +
+            "      vec3 neonPink = vec3(1.0, 0.0, 0.45);\n" +
+            
+            "      float colorVal = sin(r1 * 4.5 + u_time * 2.0 + u_color_shift * 3.1) * 0.5 + 0.5;\n" +
+            "      vec3 baseCol = mix(neonBlue, neonPurple, colorVal);\n" +
+            
+            "      if (u_complexity > 0.55) {\n" +
+            "         baseCol = mix(baseCol, neonPink, cos(r1 * 2.5 - u_time) * 0.3 + 0.3);\n" +
+            "      }\n" +
+            
+            // Fresnel edges glow
+            "      float fresnel = 1.0 - max(0.0, dot(n, -ver));\n" +
+            "      fresnel = pow(fresnel, 4.0) * u_glow * 1.5;\n" +
+            "      color = baseCol * lighting + vec3(fresnel) * neonPink;\n" +
+            
+            // Volumetric Fog
+            "      float fogFactor = 1.0 - exp(-rayDist * 0.22 * u_fog);\n" +
+            "      vec3 fogCol = mix(vec3(0.03, 0.015, 0.06), vec3(0.08, 0.0, 0.12), sin(u_time * 0.1) * 0.5 + 0.5);\n" +
+            "      color = mix(color, fogCol, fogFactor);\n" +
             "   }\n" +
-            "   gl_FragColor = vec4(color.x, color.y, color.z, 1.0);" +
+            
+            "   else {\n" +
+            // Cosmic Space Background with neon scan-grid lines
+            "      vec3 spaceBg = vec3(0.015, 0.01, 0.025);\n" +
+            
+            "      float g1 = sin(dir.x * 2.5 + u_time * 0.1) * cos(dir.y * 2.5 - u_time * 0.15);\n" +
+            "      float g2 = cos(dir.z * 3.5 - u_time * 0.2) * sin(dir.y * 1.8 + u_time * 0.1);\n" +
+            "      vec3 nebula = vec3(0.35, 0.0, 0.55) * max(0.0, g1) + vec3(0.0, 0.25, 0.5) * max(0.0, g2);\n" +
+            
+            // Subtle neon scanning grid lines in deep space background
+            "      float gridX = step(0.988, sin(dir.x * 24.0 + dir.z * 6.0));\n" +
+            "      float gridY = step(0.988, sin(dir.y * 24.0 + dir.z * 6.0));\n" +
+            "      vec3 gridLine = vec3(0.0, 0.35, 0.55) * (gridX + gridY) * 0.12;\n" +
+            
+            "      color = spaceBg + nebula * 0.2 + gridLine;\n" +
+            "   }\n" +
+            "   gl_FragColor = vec4(color.x, color.y, color.z, 1.0);\n" +
             "}";
-        canvas = document.getElementById('c1');
-        gl = canvas.getContext('webgl');
-        vertshader = gl.createShader(gl.VERTEX_SHADER);
-        fragshader = gl.createShader(gl.FRAGMENT_SHADER);
-        shaderProgram = gl.createProgram();
-        gl.shaderSource(vertshader, VSHADER_SOURCE);
-        gl.compileShader(vertshader);
-        var infov = gl.getShaderInfoLog(vertshader);
-        gl.shaderSource(fragshader, FSHADER_SOURCE + KERNEL);
-        gl.compileShader(fragshader);
-        var infof = gl.getShaderInfoLog(fragshader);
-        gl.attachShader(shaderProgram, vertshader);
-        gl.attachShader(shaderProgram, fragshader);
-        gl.linkProgram(shaderProgram);
-        gl.useProgram(shaderProgram);
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            var info = gl.getProgramInfoLog(shaderProgram);
-            throw 'Could not compile WebGL program. \n\n' + infov + infof + info;
-        }
-        glposition = gl.getAttribLocation(shaderProgram, 'position');
-        glright = gl.getUniformLocation(shaderProgram, 'right');
-        glforward = gl.getUniformLocation(shaderProgram, 'forward');
-        glup = gl.getUniformLocation(shaderProgram, 'up');
-        glorigin = gl.getUniformLocation(shaderProgram, 'origin');
-        glx = gl.getUniformLocation(shaderProgram, 'x');
-        gly = gl.getUniformLocation(shaderProgram, 'y');
-        gllen = gl.getUniformLocation(shaderProgram, 'len');
-        var buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(glposition, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(glposition);
 
-        gl.viewport(0, 0, 1024, 1024);
-        draw();
-        window.requestAnimationFrame(ontimer);
-        document.getElementById("kernel").value = KERNEL;
-        document.getElementById("btn").addEventListener("click", function() {
-            var state = this.innerText == "CONFIG";
-            this.innerText = state ? "HIDE" : "CONFIG";
-            document.getElementById("config").style.display = state ? "inline" : "none";
-        });
-        document.getElementById("apply").addEventListener("click", function() {
-            KERNEL = document.getElementById("kernel").value;
+        // Handle Resizing
+        function handleResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            canvas2.width = width;
+            canvas2.height = height;
+            
+            if (gl) {
+                gl.viewport(0, 0, width, height);
+            }
+            
+            // Re-render chart if open
+            if (currentState === STATE_RESULTS) {
+                drawFpsChart(fpsHistory);
+            }
+        }
+
+        // Request Fullscreen
+        function goFullscreen() {
+            const element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+        }
+
+        // Initialize 2D canvas particle array
+        function initParticles() {
+            particles = [];
+            const count = Math.min(60, Math.floor(window.innerWidth / 20));
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    vx: (Math.random() - 0.5) * 1.2,
+                    vy: (Math.random() - 0.5) * 1.2,
+                    size: Math.random() * 2.5 + 0.8,
+                    r: Math.random() > 0.5 ? 0 : 189,
+                    g: Math.random() > 0.5 ? 240 : 0,
+                    b: Math.random() > 0.5 ? 255 : 255,
+                    alpha: Math.random() * 0.45 + 0.15
+                });
+            }
+        }
+
+        // Draw overlay 2D particles
+        function updateAndDrawParticles() {
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+            
+            // Draw scanning lines/CRT scan lines overlay
+            ctx2.fillStyle = 'rgba(255, 255, 255, 0.007)';
+            for (let y = 0; y < canvas2.height; y += 4) {
+                ctx2.fillRect(0, y, canvas2.width, 1);
+            }
+            
+            // Draw particles
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                // Wrap around edges
+                if (p.x < 0) p.x = canvas2.width;
+                if (p.x > canvas2.width) p.x = 0;
+                if (p.y < 0) p.y = canvas2.height;
+                if (p.y > canvas2.height) p.y = 0;
+                
+                ctx2.fillStyle = `rgba(${p.r}, ${p.g}, ${p.b}, ${p.alpha})`;
+                ctx2.beginPath();
+                ctx2.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx2.fill();
+            }
+
+            // Cinematic Intro Phase Logo Reveal (Phase 1, 0-10s)
+            if (currentState === STATE_BENCHMARK) {
+                const elapsed = (performance.now() - benchmarkStartTime) / 1000.0;
+                if (elapsed < 8.0) {
+                    ctx2.save();
+                    
+                    // Logo Fade-out over time
+                    let opacity = 1.0;
+                    if (elapsed > 5.0) {
+                        opacity = 1.0 - (elapsed - 5.0) / 3.0;
+                    }
+                    
+                    ctx2.globalAlpha = Math.max(0, opacity);
+                    
+                    // Neon glowing setup
+                    ctx2.shadowColor = 'rgba(189, 0, 255, 0.7)';
+                    ctx2.shadowBlur = 20;
+                    
+                    // Glitch title text effect
+                    ctx2.fillStyle = '#ffffff';
+                    ctx2.font = 'bold 36px Outfit';
+                    ctx2.textAlign = 'center';
+                    ctx2.textBaseline = 'middle';
+                    
+                    let titleStr = "MONOTRIX RENDERING CORE";
+                    // 3% chance to glitch text
+                    if (elapsed < 4.0 && Math.random() > 0.96) {
+                        titleStr = "M0N0TR1X R3ND3R1NG C0R3";
+                        ctx2.fillStyle = '#00f0ff';
+                    }
+                    
+                    ctx2.fillText(titleStr, canvas2.width / 2, canvas2.height / 2 - 15);
+                    
+                    ctx2.shadowColor = 'rgba(0, 240, 255, 0.6)';
+                    ctx2.shadowBlur = 10;
+                    ctx2.fillStyle = '#00f0ff';
+                    ctx2.font = '600 12px Outfit';
+                    ctx2.fillText("GPU GRAPHICS BENCHMARK • SYSTEM STRESS TEST", canvas2.width / 2, canvas2.height / 2 + 25);
+                    
+                    ctx2.restore();
+                }
+                
+                // Fade out effect at the end of the benchmark (58s to 60s)
+                if (elapsed >= 58.0) {
+                    let fadeOpacity = (elapsed - 58.0) / 2.0;
+                    ctx2.fillStyle = `rgba(8, 6, 10, ${Math.min(1.0, fadeOpacity)})`;
+                    ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
+                }
+            }
+        }
+
+        // Initialize WebGL Context and compile shaders
+        function initWebGL() {
+            canvas = document.getElementById('c1');
+            gl = canvas.getContext('webgl', { antialias: false, powerPreference: "high-performance" });
+            
+            if (!gl) {
+                console.error("WebGL 1.0 not supported!");
+                return;
+            }
+
+            vertshader = gl.createShader(gl.VERTEX_SHADER);
+            fragshader = gl.createShader(gl.FRAGMENT_SHADER);
+            shaderProgram = gl.createProgram();
+            
+            gl.shaderSource(vertshader, VSHADER_SOURCE);
+            gl.compileShader(vertshader);
+            
             gl.shaderSource(fragshader, FSHADER_SOURCE + KERNEL);
             gl.compileShader(fragshader);
-            var infof = gl.getShaderInfoLog(fragshader);
+            
+            gl.attachShader(shaderProgram, vertshader);
+            gl.attachShader(shaderProgram, fragshader);
             gl.linkProgram(shaderProgram);
             gl.useProgram(shaderProgram);
+            
             if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                var info = gl.getProgramInfoLog(shaderProgram);
-                alert(infof + info);
+                let infov = gl.getShaderInfoLog(vertshader);
+                let infof = gl.getShaderInfoLog(fragshader);
+                let info = gl.getProgramInfoLog(shaderProgram);
+                throw 'WebGL compilation failed: \n\n' + infov + infof + info;
             }
+            
+            // Get locations
             glposition = gl.getAttribLocation(shaderProgram, 'position');
             glright = gl.getUniformLocation(shaderProgram, 'right');
             glforward = gl.getUniformLocation(shaderProgram, 'forward');
@@ -487,12 +1183,627 @@ alert("trigonometric and inverse trigonometric functions test.\ncreated by cznul
             glx = gl.getUniformLocation(shaderProgram, 'x');
             gly = gl.getUniformLocation(shaderProgram, 'y');
             gllen = gl.getUniformLocation(shaderProgram, 'len');
-        });
-        document.getElementById("cancle").addEventListener("click", function() {
+            
+            // Get Cyberpunk new features uniforms locations
+            uTimeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
+            uComplexityLoc = gl.getUniformLocation(shaderProgram, 'u_complexity');
+            uFogLoc = gl.getUniformLocation(shaderProgram, 'u_fog');
+            uGlowLoc = gl.getUniformLocation(shaderProgram, 'u_glow');
+            uColorShiftLoc = gl.getUniformLocation(shaderProgram, 'u_color_shift');
+            
+            let positions = [-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, 1.0, 0.0];
+            let buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+            gl.vertexAttribPointer(glposition, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(glposition);
+            
             document.getElementById("kernel").value = KERNEL;
-        });
-    }
+            
+            handleResize();
+        }
+
+        // Draw a single frame of the 3D Raymarching Shader
+        function drawWebGLFrame(elapsedTime) {
+            if (!gl) return;
+            
+            let aspect = canvas.width / canvas.height;
+            gl.uniform1f(glx, aspect);
+            gl.uniform1f(gly, 1.0);
+            gl.uniform1f(gllen, len);
+            
+            // Bind uniforms
+            gl.uniform1f(uTimeLoc, elapsedTime);
+            gl.uniform1f(uComplexityLoc, currentComplexity);
+            gl.uniform1f(uFogLoc, currentFog);
+            gl.uniform1f(uGlowLoc, currentGlow);
+            gl.uniform1f(uColorShiftLoc, currentColorShift);
+            
+            gl.uniform3f(glorigin, len * Math.cos(ang1) * Math.cos(ang2) + cenx, len * Math.sin(ang2) + ceny, len * Math.sin(ang1) * Math.cos(ang2) + cenz);
+            gl.uniform3f(glright, Math.sin(ang1), 0, -Math.cos(ang1));
+            gl.uniform3f(glup, -Math.sin(ang2) * Math.cos(ang1), Math.cos(ang2), -Math.sin(ang2) * Math.sin(ang1));
+            gl.uniform3f(glforward, -Math.cos(ang1) * Math.cos(ang2), -Math.sin(ang2), -Math.sin(ang1) * Math.cos(ang2));
+            
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            gl.finish();
+        }
+
+        // Start mock loading assets transition (Step 2)
+        function startLoadingTransition() {
+            currentState = STATE_LOADING;
+            
+            // Display transition screen
+            const startup = document.getElementById('startupOverlay');
+            const loading = document.getElementById('loadingOverlay');
+            
+            startup.style.opacity = '0';
+            setTimeout(() => {
+                startup.style.display = 'none';
+                loading.style.display = 'flex';
+                loading.offsetHeight; // trigger reflow
+                loading.style.opacity = '1';
+            }, 500);
+
+            // Mock console text strings
+            const mockLogs = [
+                "> INITIALIZING PERFORMANCE GRAPHICS ENGINE...",
+                "> ATTACHING COMPATIBILITY GRAPHICS CONTEXT...",
+                "> COMPILING FRACTAL RAYMARCH KERNEL SHADERS...",
+                "> BINDING CONSTANT UNIFORMS & BUFFERS...",
+                "> ALLOCATING MEMORY FOR PARTICLE VECTORS...",
+                "> CALIBRATING SYSTEM TEMPERATURE READINGS...",
+                "> PRE-WARMING GPU PIPELINES AND GEOMETRY...",
+                "> MONOTRIX ENGINE WARMED AND READY."
+            ];
+
+            let progress = 0;
+            const bar = document.getElementById('progressBar');
+            const status = document.getElementById('loadingStatus');
+            const consoleBox = document.getElementById('mockConsole');
+            
+            // Compile WebGL shaders in background during loading
+            try {
+                initWebGL();
+            } catch(e) {
+                consoleBox.innerHTML += `<div style="color:var(--neon-pink); font-weight:bold;">> ERROR: ${e}</div>`;
+                return;
+            }
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 5 + 2;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // Finalize loading transition
+                    setTimeout(() => {
+                        fadeLoadingToBenchmark();
+                    }, 500);
+                }
+                
+                bar.style.width = progress + '%';
+                
+                // Add console lines proportional to progress
+                let logIndex = Math.floor((progress / 100) * mockLogs.length);
+                if (logIndex > consoleBox.children.length && logIndex <= mockLogs.length) {
+                    for(let i = consoleBox.children.length; i < logIndex; i++) {
+                        let div = document.createElement('div');
+                        div.className = 'mock-line';
+                        div.innerHTML = mockLogs[i];
+                        consoleBox.appendChild(div);
+                        consoleBox.scrollTop = consoleBox.scrollHeight;
+                    }
+                    status.innerText = mockLogs[logIndex - 1].substring(2);
+                }
+            }, 100);
+        }
+
+        // Transition Loading Screen out, HUD and Benchmark in
+        function fadeLoadingToBenchmark() {
+            const loading = document.getElementById('loadingOverlay');
+            const hud = document.getElementById('hudOverlay');
+            
+            loading.style.opacity = '0';
+            setTimeout(() => {
+                loading.style.display = 'none';
+                hud.style.opacity = '1';
+                
+                // Initialize timer variables
+                currentState = STATE_BENCHMARK;
+                benchmarkStartTime = performance.now();
+                lastFrameTime = performance.now();
+                lastFpsUpdate = performance.now();
+                fpsHistory = [];
+                
+                // Trigger animation loop
+                requestAnimationFrame(benchmarkLoop);
+            }, 500);
+        }
+
+        // Core animation frame update loop
+        function benchmarkLoop() {
+            if (currentState !== STATE_BENCHMARK) return;
+            
+            const now = performance.now();
+            const elapsed = (now - benchmarkStartTime) / 1000.0;
+            const delta = now - lastFrameTime;
+            lastFrameTime = now;
+            
+            frameTime = delta;
+            totalFramesRendered++;
+            framesThisSecond++;
+            
+            // Display real-time frame time immediately (feels premium)
+            document.getElementById('hudFrameTime').innerText = delta.toFixed(1) + ' ms';
+            
+            // Dynamic Phase Controller (0s - 60s)
+            updateBenchmarkPhases(elapsed);
+            
+            // Render 3D Fractal
+            drawWebGLFrame(elapsed);
+            
+            // Render 2D overlays (particles & logo reveal)
+            updateAndDrawParticles();
+            
+            // FPS Updates (Every 1 second)
+            if (now - lastFpsUpdate >= 1000) {
+                let currentFps = framesThisSecond;
+                framesThisSecond = 0;
+                lastFpsUpdate = now;
+                
+                fpsHistory.push(currentFps);
+                
+                // Filter out the first 2 seconds from minFps calculation (avoids transition dropouts)
+                if (elapsed > 2.0) {
+                    if (currentFps < minFps) minFps = currentFps;
+                }
+                if (currentFps > maxFps) maxFps = currentFps;
+                
+                // Calculate Average FPS
+                let sum = 0;
+                for (let i = 0; i < fpsHistory.length; i++) {
+                    sum += fpsHistory[i];
+                }
+                averageFps = sum / fpsHistory.length;
+                
+                // Track phase-wise frame data for results file
+                trackPhaseFrameRate(currentFps);
+                
+                // Score accrual based on rendering load multiplier
+                let scoreMultiplier = 1;
+                if (currentPhase === 1) scoreMultiplier = 1.0;
+                else if (currentPhase === 2) scoreMultiplier = 2.5;
+                else if (currentPhase === 3) scoreMultiplier = 6.0;
+                else if (currentPhase === 4) scoreMultiplier = 1.5;
+                
+                benchmarkScore += Math.round(currentFps * scoreMultiplier);
+                
+                // Update HUD Text fields
+                document.getElementById('hudFps').innerText = currentFps;
+                document.getElementById('hudAvgFps').innerText = Math.round(averageFps);
+                document.getElementById('hudScore').innerText = benchmarkScore;
+                
+                // Push update to diagnostics terminal log
+                let logBox = document.getElementById('hudLog');
+                let log = document.createElement('div');
+                log.innerText = `[${Math.round(elapsed)}s] FPS: ${currentFps} | STRESS LOAD: ${Math.round(currentComplexity * 100)}% | FOG: ${Math.round(currentFog * 100)}%`;
+                logBox.appendChild(log);
+                logBox.scrollTop = logBox.scrollHeight;
+                if (logBox.children.length > 2) {
+                    logBox.removeChild(logBox.firstChild);
+                }
+            }
+            
+            // End of Benchmark (60 seconds)
+            if (elapsed >= 60.0) {
+                stopBenchmarkAndShowResults();
+                return;
+            }
+            
+            requestAnimationFrame(benchmarkLoop);
+        }
+
+        // Track FPS for individual phase averages
+        function trackPhaseFrameRate(fpsVal) {
+            if (currentPhase === 1) { ph1FpsSum += fpsVal; ph1Frames++; }
+            else if (currentPhase === 2) { ph2FpsSum += fpsVal; ph2Frames++; }
+            else if (currentPhase === 3) { ph3FpsSum += fpsVal; ph3Frames++; }
+            else if (currentPhase === 4) { ph4FpsSum += fpsVal; ph4Frames++; }
+        }
+
+        // Orchestrate camera movements and shader parameters by benchmark progress
+        function updateBenchmarkPhases(elapsed) {
+            const phaseLabel = document.getElementById('hudPhase');
+            
+            if (elapsed < 10.0) {
+                // PHASE 1: Cinematic logo reveal, camera glide, low stress
+                currentPhase = 1;
+                phaseLabel.innerText = "PHASE 1: LOGO REVEAL & CORE CALIBRATION";
+                
+                currentComplexity = 0.25;
+                currentFog = 0.15;
+                currentGlow = 0.4;
+                currentColorShift = elapsed * 0.1;
+                
+                // Smooth camera zoom-in glide
+                let t = elapsed / 10.0;
+                len = 3.5 - t * 1.7; // zoom in from 3.5 to 1.8
+                ang1 = 2.8 + t * 0.4;
+                ang2 = 0.4;
+                cenx = 0.0; ceny = 0.0; cenz = 0.0;
+                
+            } else if (elapsed < 30.0) {
+                // PHASE 2: Shader stressing, HDR highlights, dynamic camera waves
+                currentPhase = 2;
+                phaseLabel.innerText = "PHASE 2: HIGH-INTENSITY GPU SHADER STRESS";
+                
+                currentComplexity = 0.6;
+                currentFog = 0.25;
+                currentGlow = 0.8;
+                currentColorShift = elapsed * 0.55;
+                
+                let t = (elapsed - 10.0) / 20.0;
+                len = 1.8 + Math.sin(t * Math.PI * 2) * 0.35;
+                ang1 = 3.2 + elapsed * 0.06;
+                ang2 = 0.4 + Math.sin(elapsed * 0.25) * 0.18;
+                cenx = Math.sin(elapsed * 0.12) * 0.08;
+                ceny = 0.0;
+                cenz = Math.cos(elapsed * 0.12) * 0.08;
+                
+            } else if (elapsed < 50.0) {
+                // PHASE 3: Max Complexity, deep geometric folds raymarching, volumetric fog
+                currentPhase = 3;
+                phaseLabel.innerText = "PHASE 3: VOLUMETRIC SCENE COMPLEXITY stress";
+                
+                currentComplexity = 1.0;
+                currentFog = 0.85;
+                currentGlow = 1.2;
+                currentColorShift = elapsed * 1.1;
+                
+                let t = (elapsed - 30.0) / 20.0;
+                len = 1.4 + Math.sin(elapsed * 0.45) * 0.2; // deep zoom
+                ang1 = 4.4 + (elapsed - 30.0) * 0.1;
+                ang2 = 0.4 + Math.sin(elapsed * 0.6) * 0.28;
+                
+                // Shift camera targets to wander inside the Mandelbox fractal
+                cenx = Math.sin(elapsed * 0.35) * 0.28;
+                ceny = Math.cos(elapsed * 0.45) * 0.22;
+                cenz = Math.sin(elapsed * 0.25) * 0.28;
+                
+            } else {
+                // PHASE 4: Cool down, slow retreat pan, results preparing
+                currentPhase = 4;
+                phaseLabel.innerText = "PHASE 4: SYSTEM STABILITY COOL DOWN";
+                
+                currentComplexity = 0.3;
+                currentFog = 0.35;
+                currentGlow = 0.5;
+                
+                let t = (elapsed - 50.0) / 10.0;
+                len = 1.5 + t * 2.0; // Zoom out back to 3.5
+                ang1 = 6.4 + (elapsed - 50.0) * 0.02;
+                ang2 = 0.4;
+                cenx *= (1.0 - t);
+                ceny *= (1.0 - t);
+                cenz *= (1.0 - t);
+            }
+        }
+
+        // Stop benchmark, compile scores, fade in the results overlay card
+        let overallScore = 0, graphicsScore = 0, shaderScore = 0;
+        let perfGrade = 'A';
+        
+        function stopBenchmarkAndShowResults() {
+            currentState = STATE_RESULTS;
+            
+            // Calculate final scores
+            graphicsScore = Math.round((ph2FpsSum / (ph2Frames || 1)) * 135);
+            shaderScore = Math.round((ph3FpsSum / (ph3Frames || 1)) * 320);
+            overallScore = Math.round(graphicsScore * 0.4 + shaderScore * 0.6);
+            
+            // Grade calibration
+            if (averageFps >= 58.0) perfGrade = 'S+';
+            else if (averageFps >= 50.0) perfGrade = 'S';
+            else if (averageFps >= 42.0) perfGrade = 'A';
+            else if (averageFps >= 30.0) perfGrade = 'B';
+            else if (averageFps >= 20.0) perfGrade = 'C';
+            else perfGrade = 'D';
+
+            // Clean up HUD
+            const hud = document.getElementById('hudOverlay');
+            hud.style.opacity = '0';
+            
+            // Set results DOM text values
+            document.getElementById('resGrade').innerText = perfGrade;
+            document.getElementById('resOverallScore').innerText = overallScore;
+            document.getElementById('resGraphicsScore').innerText = graphicsScore;
+            document.getElementById('resShaderScore').innerText = shaderScore;
+            document.getElementById('resAvgFps').innerText = Math.round(averageFps);
+            document.getElementById('resMinFps').innerText = minFps === 9999 ? 0 : minFps;
+            document.getElementById('resMaxFps').innerText = maxFps;
+
+            // Fade in results modal
+            setTimeout(() => {
+                const results = document.getElementById('resultsOverlay');
+                results.style.display = 'flex';
+                results.offsetHeight; // trigger reflow
+                results.style.opacity = '1';
+                
+                // Draw chart of FPS history
+                drawFpsChart(fpsHistory);
+            }, 600);
+        }
+
+        // Draw dynamic line chart of benchmark FPS
+        function drawFpsChart(history) {
+            const chartCanvas = document.getElementById('fpsChart');
+            const rect = chartCanvas.getBoundingClientRect();
+            
+            chartCanvas.width = rect.width * window.devicePixelRatio;
+            chartCanvas.height = rect.height * window.devicePixelRatio;
+            
+            const ctx = chartCanvas.getContext('2d');
+            const w = chartCanvas.width;
+            const h = chartCanvas.height;
+            
+            ctx.clearRect(0, 0, w, h);
+            if (history.length === 0) return;
+            
+            const padding = 24 * window.devicePixelRatio;
+            const graphW = w - padding * 2;
+            const graphH = h - padding * 2;
+            
+            let maxVal = Math.max(...history);
+            let minVal = Math.min(...history);
+            maxVal = Math.max(60, Math.ceil(maxVal / 10) * 10);
+            minVal = Math.max(0, Math.floor(minVal / 10) * 10 - 10);
+            
+            const valRange = maxVal - minVal;
+            
+            // Grid Lines and FPS labels
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1 * window.devicePixelRatio;
+            ctx.font = `${9 * window.devicePixelRatio}px monospace`;
+            ctx.fillStyle = '#8c829c';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            
+            const gridRows = 4;
+            for (let i = 0; i <= gridRows; i++) {
+                let ratio = i / gridRows;
+                let y = padding + graphH * (1 - ratio);
+                let val = Math.round(minVal + valRange * ratio);
+                
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(w - padding, y);
+                ctx.stroke();
+                
+                ctx.fillText(val, padding - 8 * window.devicePixelRatio, y);
+            }
+            
+            // Draw chart line path
+            ctx.beginPath();
+            for (let i = 0; i < history.length; i++) {
+                let xRatio = i / (history.length - 1 || 1);
+                let yRatio = (history[i] - minVal) / valRange;
+                
+                let px = padding + graphW * xRatio;
+                let py = padding + graphH * (1 - yRatio);
+                
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            
+            // Apply Glowing Purple neon outline
+            let gradLine = ctx.createLinearGradient(padding, 0, w - padding, 0);
+            gradLine.addColorStop(0, '#bd00ff');
+            gradLine.addColorStop(0.5, '#ff005b');
+            gradLine.addColorStop(1, '#00f0ff');
+            
+            ctx.strokeStyle = gradLine;
+            ctx.lineWidth = 2.5 * window.devicePixelRatio;
+            ctx.shadowColor = 'rgba(189, 0, 255, 0.55)';
+            ctx.shadowBlur = 8 * window.devicePixelRatio;
+            ctx.stroke();
+            
+            // Apply fill underneath line graph
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding + graphH);
+            for (let i = 0; i < history.length; i++) {
+                let xRatio = i / (history.length - 1 || 1);
+                let yRatio = (history[i] - minVal) / valRange;
+                let px = padding + graphW * xRatio;
+                let py = padding + graphH * (1 - yRatio);
+                ctx.lineTo(px, py);
+            }
+            ctx.lineTo(padding + graphW, padding + graphH);
+            ctx.closePath();
+            
+            let gradFill = ctx.createLinearGradient(0, padding, 0, padding + graphH);
+            gradFill.addColorStop(0, 'rgba(189, 0, 255, 0.22)');
+            gradFill.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+            ctx.fillStyle = gradFill;
+            ctx.fill();
+        }
+
+        // Build and prompt download of results txt file report
+        function downloadResults() {
+            let p1Avg = Math.round(ph1FpsSum / (ph1Frames || 1));
+            let p2Avg = Math.round(ph2FpsSum / (ph2Frames || 1));
+            let p3Avg = Math.round(ph3FpsSum / (ph3Frames || 1));
+            let p4Avg = Math.round(ph4FpsSum / (ph4Frames || 1));
+            
+            let report = 
+`=========================================
+  MONOTRIX PERFORMANCE BENCHMARK REPORT  
+=========================================
+Date: ${new Date().toLocaleString()}
+User Agent: ${navigator.userAgent}
+
+BENCHMARK SCORES:
+-----------------
+Overall Score: ${overallScore}
+Graphics Score: ${graphicsScore}
+Shader Score: ${shaderScore}
+Performance Grade: ${perfGrade}
+
+FPS PERFORMANCE:
+----------------
+Average FPS: ${averageFps.toFixed(1)}
+Minimum FPS: ${minFps === 9999 ? 0 : minFps}
+Maximum FPS: ${maxFps}
+Benchmark Duration: 60 Seconds
+
+STAGES AVERAGES:
+----------------
+Phase 1 (Intro/Warmup): ${p1Avg} FPS
+Phase 2 (Shader Stress): ${p2Avg} FPS
+Phase 3 (Volumetric Complex): ${p3Avg} FPS
+Phase 4 (Stability Cooldown): ${p4Avg} FPS
+
+SYSTEM PARAMETERS:
+------------------
+Renderer: WebGL 1.0 Raymarched Mandelbox Fractal
+Resolution: ${window.innerWidth}x${window.innerHeight}
+
+=========================================
+Generated by Monotrix Performance Lab
+=========================================`;
+
+            const blob = new Blob([report], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = 'monotrix_benchmark_results.txt';
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+        }
+
+        // Reset benchmark to start screen state
+        function resetBenchmark() {
+            // Reset scores
+            framesThisSecond = 0;
+            fpsHistory = [];
+            instantFps = 60;
+            averageFps = 0;
+            minFps = 9999;
+            maxFps = 0;
+            benchmarkScore = 0;
+            totalFramesRendered = 0;
+            ph1FpsSum = 0; ph1Frames = 0;
+            ph2FpsSum = 0; ph2Frames = 0;
+            ph3FpsSum = 0; ph3Frames = 0;
+            ph4FpsSum = 0; ph4Frames = 0;
+            
+            len = 3.5; ang1 = 2.8; ang2 = 0.4;
+            cenx = 0.0; ceny = 0.0; cenz = 0.0;
+            
+            currentComplexity = 0.25;
+            currentFog = 0.1;
+            currentGlow = 0.5;
+            currentColorShift = 0.0;
+
+            // Reset sound
+            bgAudio.pause();
+            bgAudio.currentTime = 0;
+
+            // UI Transitions
+            const results = document.getElementById('resultsOverlay');
+            const startup = document.getElementById('startupOverlay');
+            
+            results.style.opacity = '0';
+            setTimeout(() => {
+                results.style.display = 'none';
+                startup.style.display = 'flex';
+                startup.offsetHeight;
+                startup.style.opacity = '1';
+                
+                currentState = STATE_IDLE;
+                document.getElementById('hudFps').innerText = '--';
+                document.getElementById('hudAvgFps').innerText = '--';
+                document.getElementById('hudScore').innerText = '0';
+                document.getElementById('hudLog').innerHTML = '';
+            }, 500);
+        }
+
+        // Startup particle loop wrapper
+        function idleParticlesLoop() {
+            if (currentState === STATE_IDLE || currentState === STATE_LOADING || currentState === STATE_RESULTS) {
+                updateAndDrawParticles();
+            }
+            requestAnimationFrame(idleParticlesLoop);
+        }
+
+        // Initialize elements and event handlers
+        window.onload = function () {
+            canvas = document.getElementById('c1');
+            
+            // Set up overlay canvas size
+            canvas2.width = window.innerWidth;
+            canvas2.height = window.innerHeight;
+            
+            // Init particles
+            initParticles();
+            idleParticlesLoop();
+            
+            // STEP 2 Event trigger (🚀 শুরু করুন button)
+            document.getElementById('startBtn').addEventListener('click', function () {
+                goFullscreen();
+                bgAudio.play().catch(e => console.log("Audio play blocked by browser policy"));
+                startLoadingTransition();
+            });
+
+            // Results options button handlers
+            document.getElementById('runAgainBtn').addEventListener('click', function() {
+                resetBenchmark();
+            });
+
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                downloadResults();
+            });
+
+            // Original Dev panel triggers
+            document.getElementById("btn").addEventListener("click", function() {
+                let state = this.innerText == "CONFIG";
+                this.innerText = state ? "HIDE" : "CONFIG";
+                document.getElementById("config").style.display = state ? "inline" : "none";
+            });
+
+            document.getElementById("apply").addEventListener("click", function() {
+                KERNEL = document.getElementById("kernel").value;
+                gl.shaderSource(fragshader, FSHADER_SOURCE + KERNEL);
+                gl.compileShader(fragshader);
+                
+                gl.linkProgram(shaderProgram);
+                gl.useProgram(shaderProgram);
+                if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                    let info = gl.getProgramInfoLog(shaderProgram);
+                    let infof = gl.getShaderInfoLog(fragshader);
+                    alert(infof + info);
+                }
+                
+                glposition = gl.getAttribLocation(shaderProgram, 'position');
+                glright = gl.getUniformLocation(shaderProgram, 'right');
+                glforward = gl.getUniformLocation(shaderProgram, 'forward');
+                glup = gl.getUniformLocation(shaderProgram, 'up');
+                glorigin = gl.getUniformLocation(shaderProgram, 'origin');
+                glx = gl.getUniformLocation(shaderProgram, 'x');
+                gly = gl.getUniformLocation(shaderProgram, 'y');
+                gllen = gl.getUniformLocation(shaderProgram, 'len');
+                
+                uTimeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
+                uComplexityLoc = gl.getUniformLocation(shaderProgram, 'u_complexity');
+                uFogLoc = gl.getUniformLocation(shaderProgram, 'u_fog');
+                uGlowLoc = gl.getUniformLocation(shaderProgram, 'u_glow');
+                uColorShiftLoc = gl.getUniformLocation(shaderProgram, 'u_color_shift');
+            });
+
+            document.getElementById("cancle").addEventListener("click", function() {
+                document.getElementById("kernel").value = KERNEL;
+            });
+            
+            window.addEventListener('resize', handleResize);
+        }
     </script>
-    <script src="background-audio.js"></script>
 </body>
 </html>
