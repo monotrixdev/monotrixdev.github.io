@@ -709,7 +709,7 @@
         <textarea id="kernel" cols="30" rows="10"></textarea>
         <br />
         <button id="apply">APPLY</button>
-        <button id="cancle">CANCLE</button>
+        <button id="cancel">CANCEL</button>
     </div>
 
     <script>
@@ -830,19 +830,19 @@
             "uniform float u_color_shift;\n" +
             
             "vec3 ver;\n" +
-            "int sign;\n" +
+            "int hitFlag;\n" +
             "float v, v1, v2;\n" +
             "float r1, r2, r3, r4, m1, m2, m3, m4;\n" +
             "vec3 n, reflect;\n" +
-            "const float step = 0.002;\n" +
+            "const float stepSize = 0.002;\n" +
             "vec3 color;\n" +
             
             "void main() {\n" +
             "   color.r=0.0;\n" +
             "   color.g=0.0;\n" +
             "   color.b=0.0;\n" +
-            "   sign=0;\n" +
-            "   v1 = kernal(origin + dir * (step*len));\n" +
+            "   hitFlag=0;\n" +
+            "   v1 = kernal(origin + dir * (stepSize*len));\n" +
             "   v2 = kernal(origin);\n" +
             
             // Scaled loop steps base on u_complexity (Early loop breaks reduce workload dynamically)
@@ -850,11 +850,11 @@
             "   for (int k = 2; k < 1002; k++) {\n" +
             "      if (float(k) > maxK) break;\n" +
             
-            "      ver = origin + dir * (step*len*float(k));\n" +
+            "      ver = origin + dir * (stepSize*len*float(k));\n" +
             "      v = kernal(ver);\n" +
             "      if (v > 0.0 && v1 < 0.0) {\n" +
-            "         r1 = step * len*float(k - 1);\n" +
-            "         r2 = step * len*float(k);\n" +
+            "         r1 = stepSize * len*float(k - 1);\n" +
+            "         r2 = stepSize * len*float(k);\n" +
             "         m1 = kernal(origin + dir * r1);\n" +
             "         m2 = kernal(origin + dir * r2);\n" +
             "         for (int l = 0; l < SOLVER; l++) {\n" +
@@ -870,15 +870,15 @@
             "            }\n" +
             "         }\n" +
             "         if (r3 < 2.0 * len) {\n" +
-            "               sign=1;\n" +
+            "               hitFlag=1;\n" +
             "            break;\n" +
             "         }\n" +
             "      }\n" +
             "      if (v < v1&&v1>v2&&v1 < 0.0 && (v1*2.0 > v || v1 * 2.0 > v2)) {\n" +
-            "         r1 = step * len*float(k - 2);\n" +
-            "         r2 = step * len*(float(k) - 2.0 + 2.0*M_L);\n" +
-            "         r3 = step * len*(float(k) - 2.0 + 2.0*M_R);\n" +
-            "         r4 = step * len*float(k);\n" +
+            "         r1 = stepSize * len*float(k - 2);\n" +
+            "         r2 = stepSize * len*(float(k) - 2.0 + 2.0*M_L);\n" +
+            "         r3 = stepSize * len*(float(k) - 2.0 + 2.0*M_R);\n" +
+            "         r4 = stepSize * len*float(k);\n" +
             "         m2 = kernal(origin + dir * r2);\n" +
             "         m3 = kernal(origin + dir * r3);\n" +
             "         for (int l = 0; l < MAXR; l++) {\n" +
@@ -898,7 +898,7 @@
             "            }\n" +
             "         }\n" +
             "         if (m2 > 0.0) {\n" +
-            "            r1 = step * len*float(k - 2);\n" +
+            "            r1 = stepSize * len*float(k - 2);\n" +
             "            r2 = r2;\n" +
             "            m1 = kernal(origin + dir * r1);\n" +
             "            m2 = kernal(origin + dir * r2);\n" +
@@ -914,13 +914,13 @@
             "                  m1 = m3;\n" +
             "               }\n" +
             "            }\n" +
-            "            if (r3 < 2.0 * len&&r3> step*len) {\n" +
-            "                   sign=1;\n" +
+            "            if (r3 < 2.0 * len&&r3> stepSize*len) {\n" +
+            "                   hitFlag=1;\n" +
             "               break;\n" +
             "            }\n" +
             "         }\n" +
             "         else if (m3 > 0.0) {\n" +
-            "            r1 = step * len*float(k - 2);\n" +
+            "            r1 = stepSize * len*float(k - 2);\n" +
             "            r2 = r3;\n" +
             "            m1 = kernal(origin + dir * r1);\n" +
             "            m2 = kernal(origin + dir * r2);\n" +
@@ -936,8 +936,8 @@
             "                  m1 = m3;\n" +
             "               }\n" +
             "            }\n" +
-            "            if (r3 < 2.0 * len&&r3> step*len) {\n" +
-            "                   sign=1;\n" +
+            "            if (r3 < 2.0 * len&&r3> stepSize*len) {\n" +
+            "                   hitFlag=1;\n" +
             "               break;\n" +
             "            }\n" +
             "         }\n" +
@@ -947,7 +947,7 @@
             "   }\n" +
             
             // Pixel Shading
-            "   if (sign==1) {\n" +
+            "   if (hitFlag==1) {\n" +
             "      ver = origin + dir*r3;\n" +
             "      float rayDist = r3;\n" +
             "      r1=ver.x*ver.x+ver.y*ver.y+ver.z*ver.z;\n" +
@@ -1798,7 +1798,7 @@ Generated by Monotrix Performance Lab
                 uColorShiftLoc = gl.getUniformLocation(shaderProgram, 'u_color_shift');
             });
 
-            document.getElementById("cancle").addEventListener("click", function() {
+            document.getElementById("cancel").addEventListener("click", function() {
                 document.getElementById("kernel").value = KERNEL;
             });
             
