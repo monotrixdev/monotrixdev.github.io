@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Monotrix Performance Benchmark</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Outfit:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Outfit:wght@300;400;600;700&display=swap');
 
         :root {
             --bg-color: #08060a;
@@ -64,12 +65,237 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: rgba(8, 6, 10, 0.55);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: rgba(0, 0, 0, 0.52);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
+        /* === SaaS White Startup Dialog === */
+        #startupOverlay .glass-dialog {
+            background: #ffffff;
+            border: 1px solid #e8eaf0;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border-radius: 18px;
+            padding: 0;
+            max-width: 460px;
+            width: 90%;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18), 0 2px 12px rgba(0,0,0,0.08);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transform: translateY(24px);
+            opacity: 0;
+            animation: saasDialogAppear 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes saasDialogAppear {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Dot-grid background pattern on card */
+        #startupOverlay .glass-dialog::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, #d1d5e8 1px, transparent 1px);
+            background-size: 22px 22px;
+            opacity: 0.45;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Top gradient header bar */
+        #startupOverlay .saas-header {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #a21caf 100%);
+            padding: 28px 32px 24px;
+            text-align: left;
+        }
+
+        #startupOverlay .saas-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.28);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 30px;
+            margin-bottom: 14px;
+        }
+
+        #startupOverlay .saas-label i {
+            font-size: 9px;
+        }
+
+        #startupOverlay .saas-heading {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 6px 0;
+            line-height: 1.3;
+            letter-spacing: -0.3px;
+        }
+
+        #startupOverlay .saas-subheading {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 13px;
+            color: rgba(255,255,255,0.72);
+            margin: 0;
+            font-weight: 400;
+            line-height: 1.55;
+        }
+
+        /* Card body */
+        #startupOverlay .saas-body {
+            position: relative;
+            z-index: 1;
+            padding: 24px 32px 28px;
+            background: #ffffff;
+        }
+
+        /* Feature rows */
+        #startupOverlay .saas-features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        #startupOverlay .saas-feature-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #f8f9fc;
+            border: 1px solid #edeef3;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        #startupOverlay .saas-feature-row:hover {
+            border-color: #c7c3f5;
+            box-shadow: 0 2px 10px rgba(79, 70, 229, 0.08);
+        }
+
+        #startupOverlay .saas-feat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 15px;
+        }
+
+        #startupOverlay .saas-feat-icon.ic-blue  { background: #eff0ff; color: #4f46e5; }
+        #startupOverlay .saas-feat-icon.ic-green { background: #f0fdf4; color: #16a34a; }
+        #startupOverlay .saas-feat-icon.ic-amber { background: #fffbeb; color: #d97706; }
+
+        #startupOverlay .saas-feat-text strong {
+            display: block;
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 2px;
+            line-height: 1.35;
+        }
+
+        #startupOverlay .saas-feat-text p {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 11.5px;
+            color: #6b7280;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Divider */
+        #startupOverlay .saas-divider {
+            border: none;
+            border-top: 1px solid #edeef3;
+            margin: 0 0 18px;
+        }
+
+        /* SaaS Start Button */
+        #startupOverlay .start-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            color: #fff;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.22s ease;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.38);
+            letter-spacing: 0.2px;
+        }
+
+        #startupOverlay .start-btn .btn-label {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            position: relative;
+            z-index: 2;
+        }
+
+        #startupOverlay .start-btn i {
+            font-size: 14px;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.22s ease;
+        }
+
+        #startupOverlay .start-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.22s ease;
+        }
+
+        #startupOverlay .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(79, 70, 229, 0.5);
+        }
+
+        #startupOverlay .start-btn:hover::before { opacity: 1; }
+        #startupOverlay .start-btn:hover i { transform: translateX(4px); }
+        #startupOverlay .start-btn:active { transform: translateY(0); }
+
+        /* Footnote */
+        #startupOverlay .saas-footnote {
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+            color: #9ca3af;
+            text-align: center;
+            margin: 13px 0 0;
+            letter-spacing: 0.2px;
+        }
+
+        #startupOverlay .saas-footnote i {
+            margin-right: 4px;
+            color: #4f46e5;
+        }
+
+        /* Dark glass-dialog for non-startup overlays remains unchanged */
         .glass-dialog {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
@@ -79,7 +305,7 @@
             padding: 45px 40px;
             max-width: 500px;
             width: 85%;
-            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.75), 
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.75),
                         inset 0 1px 1px rgba(255, 255, 255, 0.15),
                         0 0 40px rgba(189, 0, 255, 0.2);
             text-align: center;
@@ -97,8 +323,11 @@
             }
         }
 
-        /* Dynamic Glowing Neon Border */
-        .glass-dialog::before {
+        /* Suppress neon border & glare ::before on the white startup dialog */
+        #startupOverlay .glass-dialog::after { display: none !important; }
+
+        /* Dynamic Glowing Neon Border — only for non-startup dialogs */
+        .glass-dialog:not(#startupOverlay .glass-dialog)::before {
             content: '';
             position: absolute;
             top: 0;
@@ -114,6 +343,18 @@
             mask-composite: exclude;
             pointer-events: none;
             animation: borderGlowMove 6s linear infinite;
+        }
+
+        /* Startup dialog accent top bar */
+        #startupOverlay .glass-dialog::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+            background: linear-gradient(90deg, #1a7ffa 0%, #0bbf72 50%, #f7b731 100%);
         }
 
         @keyframes borderGlowMove {
@@ -135,6 +376,109 @@
             100% { transform: scale(1.08); filter: drop-shadow(0 0 25px rgba(189, 0, 255, 0.8)); }
         }
 
+        /* === White Dialog Typography === */
+        #startupOverlay .dialog-icon {
+            font-size: 52px;
+            margin-bottom: 8px;
+            animation: none;
+            filter: none;
+        }
+
+        #startupOverlay .offer-badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #1a7ffa, #0bbf72);
+            color: #fff;
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 4px 14px;
+            border-radius: 30px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        #startupOverlay .bengali-title {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: #111827;
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: unset;
+            text-shadow: none;
+            line-height: 1.35;
+        }
+
+        #startupOverlay .bengali-subtitle {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 13px;
+            color: #6b7280;
+            margin: 0 0 22px 0;
+            font-weight: 400;
+        }
+
+        #startupOverlay .offer-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        #startupOverlay .offer-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        #startupOverlay .offer-card:hover {
+            border-color: #1a7ffa;
+            box-shadow: 0 0 0 3px rgba(26, 127, 250, 0.08);
+        }
+
+        #startupOverlay .offer-card-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        #startupOverlay .offer-card-text strong {
+            display: block;
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        #startupOverlay .offer-card-text span {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        #startupOverlay .offer-divider {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 0 0 20px 0;
+        }
+
+        #startupOverlay .offer-footnote {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            font-size: 11.5px;
+            color: #9ca3af;
+            margin: 16px 0 0 0;
+            line-height: 1.6;
+        }
+
+        /* Legacy dark-mode typography (used in results etc.) */
         .bengali-title {
             font-family: 'Noto Sans Bengali', sans-serif;
             font-size: 32px;
@@ -164,7 +508,51 @@
             letter-spacing: 0.5px;
         }
 
-        /* Start Button with Sweep and Glare */
+        /* Start Button — clean white-dialog style */
+        #startupOverlay .start-btn {
+            background: linear-gradient(135deg, #1a7ffa 0%, #0bbf72 100%);
+            border: none;
+            color: #fff;
+            padding: 15px 0;
+            width: 100%;
+            font-size: 17px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 18px rgba(26, 127, 250, 0.35);
+            letter-spacing: 0.3px;
+        }
+
+        #startupOverlay .start-btn span {
+            position: relative;
+            z-index: 2;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        #startupOverlay .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+            z-index: 1;
+        }
+
+        #startupOverlay .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(26, 127, 250, 0.45);
+        }
+
+        #startupOverlay .start-btn:hover::before { left: 100%; }
+        #startupOverlay .start-btn:active { transform: translateY(0px); }
+
+        /* Generic dark-theme start button (fallback / other contexts) */
         .start-btn {
             background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%);
             border: none;
@@ -598,20 +986,68 @@
     <!-- 2D Overlays Canvas (particles, titles) -->
     <canvas id="c2"></canvas>
 
-    <!-- STEP 1 - Premium Bengali Startup Dialog -->
+    <!-- STEP 1 - Professional SaaS Startup Dialog -->
     <div class="overlay" id="startupOverlay">
         <div class="glass-dialog">
-            <div class="dialog-icon">⚡</div>
-            <h1 class="bengali-title">পারফরম্যান্স যাচাইকরণ</h1>
-            <p class="bengali-desc">
-                আপনার ডিভাইসের Graphics Rendering, GPU Performance এবং Rendering Stability পরীক্ষা করার জন্য একটি উন্নত Benchmark চালু হবে।
-            </p>
-            <p class="bengali-subdesc">
-                সেরা অভিজ্ঞতার জন্য "শুরু করুন" বোতামে ক্লিক করুন।
-            </p>
-            <button class="start-btn" id="startBtn">
-                <span>🚀 শুরু করুন</span>
-            </button>
+
+            <!-- Gradient Header -->
+            <div class="saas-header">
+                <div class="saas-label">
+                    <i class="fa-solid fa-bolt"></i>
+                    Monotrix Platform
+                </div>
+                <h1 class="saas-heading">কাজ শুরু করতে প্রস্তুত?</h1>
+                <p class="saas-subheading">নিচের Start বাটনে ক্লিক করুন এবং আপনার পারফরম্যান্স সেশন শুরু করুন।</p>
+            </div>
+
+            <!-- Card Body -->
+            <div class="saas-body">
+
+                <!-- Feature rows -->
+                <div class="saas-features">
+                    <div class="saas-feature-row">
+                        <div class="saas-feat-icon ic-blue">
+                            <i class="fa-solid fa-gauge-high"></i>
+                        </div>
+                        <div class="saas-feat-text">
+                            <strong>রিয়েল-টাইম পারফরম্যান্স</strong>
+                            <p>সরাসরি FPS, Frame Time এবং স্কোর দেখুন</p>
+                        </div>
+                    </div>
+                    <div class="saas-feature-row">
+                        <div class="saas-feat-icon ic-green">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div class="saas-feat-text">
+                            <strong>বিশ্লেষণ ও রিপোর্ট</strong>
+                            <p>সেশন শেষে বিস্তারিত ফলাফল ও গ্রেড পাবেন</p>
+                        </div>
+                    </div>
+                    <div class="saas-feature-row">
+                        <div class="saas-feat-icon ic-amber">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <div class="saas-feat-text">
+                            <strong>GPU স্ট্রেস টেস্ট</strong>
+                            <p>আপনার ডিভাইসের গ্রাফিক্স সক্ষমতা পরীক্ষা করুন</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="saas-divider">
+
+                <!-- Start Button -->
+                <button class="start-btn" id="startBtn">
+                    <span class="btn-label">শুরু করুন</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <p class="saas-footnote">
+                    <i class="fa-solid fa-lock"></i>
+                    কোনো ডেটা সংগ্রহ করা হয় না &mdash; সম্পূর্ণ নিরাপদ
+                </p>
+            </div>
+
         </div>
     </div>
 
