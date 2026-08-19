@@ -47,7 +47,7 @@
 
       --side-w: 248px;
       --radius: 14px;
-
+      --border: 8px;
       --shadow-pop:
         0 18px 40px -18px rgba(15, 23, 42, .28);
     }
@@ -64,6 +64,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
+
+      flex-direction: column;
       padding: 20px;
     }
 
@@ -125,6 +127,69 @@
         transform: scale(0.97);
       }
     }
+    .inputBox {
+      width: 400px;
+      border: 1px solid var(--line);
+      padding: 5px;
+      border-radius: var(--border);
+      margin-top: 10px;
+      background-color: var(--paper);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      
+    }
+    .inputBox h2 {
+      font-size: 16px;
+      margin: 10px 0 5px 0;
+    }
+    select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--border);
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+    select,
+    select::picker(select) {
+      appearance: base-select;
+    }
+    select::picker(select) {
+      margin-top: 8px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: var(--border);
+      background-color: var(--paper);
+      box-shadow: var(--shadow-pop);
+      overflow: hidden;
+    }
+    select::picker-icon {
+      color: var(--ink-2);
+      transition: transform 0.2s ease;
+    }
+    select:open::picker-icon {
+      transform: rotate(180deg);
+    }
+    option {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background-color: var(--paper);
+      color: var(--ink);
+    }
+    option:hover,
+    option:focus {
+      background-color: var(--accent-soft);
+      color: var(--accent);
+    }
+    option:chacked {
+      background-color: var(--accent-soft);
+      color: var(--accent);
+    }
+
+
+
 
   </style>
 </head>
@@ -143,6 +208,14 @@
       <button>Get Started</button>
       <button>Learn More</button>
     </div>
+  </div>
+  <div class="inputBox">
+    <h2>Filup Form</h2>
+    <select>
+      <option>Select the items</option>
+      <option>APIV2</option>
+      <option>APIV3</option>
+    </select>
   </div>
 
 </body>
