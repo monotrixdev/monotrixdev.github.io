@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>My Website</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    :root {
+      color-scheme: light;
+
+      --ink: #0f172a;
+      --ink-2: #475569;
+      --ink-3: #94a3b8;
+      --line: #e6eaf1;
+      --paper: #ffffff;
+      --wash: #f8fafc;
+
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --hl: #bfdbfe;
+
+      --cn: #059669;
+      --cn-soft: #ecfdf5;
+
+      --intl: #7c3aed;
+      --intl-soft: #faf5ff;
+
+      --mono: "JetBrains Mono",
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+
+      --sans: Inter,
+        -apple-system,
+        "PingFang SC",
+        "Microsoft YaHei",
+        "Segoe UI",
+        sans-serif;
+
+      --side-w: 248px;
+      --radius: 14px;
+
+      --shadow-pop:
+        0 18px 40px -18px rgba(15, 23, 42, .28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--wash);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    code,
+    .mono {
+      font-family: var(--mono);
+    }
+    .container {
+      width: 400px;
+      height: auto;
+      background-color: var(--paper);
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      padding:5px;
+      transition: all 0.1s ease-in-out;
+      &:hover {
+        border: 1px solid rgb(255, 0, 0, 30%);
+        transform: scale(1.01);
+      }
+    }
+    .container .icon {
+      width: fit-content;
+      border: 1px solid rgb(255, 0, 0, 0.15);
+      padding: 5px;
+      border-radius: 8px;
+      background: rgba(255, 0, 0, 0.10);
+      color: #ff5600;
+    }
+    .icon svg {
+      width: 19px;
+      height: 19px;
+    }
+    .container h2 {
+      font-size: 16px;
+      margin: 10px 0 5px 0;
+    }
+    .container p {
+      font-size: 12px;
+      color: var(--ink-2);
+    }
+    .container .bottom-btn {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .container .bottom-btn button {
+      width: 48%;
+      padding: 10px 0;
+      border: none;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.95);
+      color: var(--paper);
+      cursor: pointer;
+      transition: all 0.1s ease-in-out;
+      &:hover {
+        transform: scale(1.03);
+      }
+      &:active {
+        transform: scale(0.97);
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    </div>
+  <h2>Try to Catch Me If You Can</h2>
+<p>
+  Explore the project, inspect its source code, and understand how it works.
+  Always use the official release from GitHub to ensure security, stability,
+  and access to the latest updates.
+</p>   <div class="bottom-btn">
+      <button>Get Started</button>
+      <button>Learn More</button>
+    </div>
+  </div>
+
+</body>
+</html>
