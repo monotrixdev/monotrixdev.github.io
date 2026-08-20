@@ -174,3 +174,29 @@ body {
   border: 3px solid var(--background);
   box-shadow: 0 0 0 2px rgb(37 99 235 / 15%);
 }
+button {
+  width: 100%;
+  padding: 0.3rem;
+  margin-top: 15px;
+  background-color: var(--foreground);
+  color: var(--background);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  outline: none;
+  border-radius: var(--radius);
+  gap: 4px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    background-color: rgb(8, 8, 8, 0.8);
+    scale: 1.03;
+  }
+  &:active {
+    background-color: rgba(8, 8, 8);
+    scale: 0.97;
+  }
+}
