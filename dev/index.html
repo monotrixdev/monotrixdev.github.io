@@ -74,7 +74,8 @@
       font-family: var(--mono);
     }
     .container {
-      width: 400px;
+      width: 400px auto;
+      max-width: 500px;
       height: auto;
       background-color: var(--paper);
       border-radius: var(--radius);
@@ -128,7 +129,9 @@
       }
     }
     .inputBox {
-      width: 400px;
+      width: 100%;
+      max-width: 500px;
+      height: auto;
       border: 1px solid var(--line);
       padding: 5px;
       border-radius: var(--border);
@@ -137,56 +140,92 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      gap: 10px;
       
     }
     .inputBox h2 {
       font-size: 16px;
       margin: 10px 0 5px 0;
     }
-    select {
+    input, select {
       width: 100%;
-      padding: 11px 14px;
+      padding: 10px 14px;
       border: 1px solid var(--line);
       border-radius: var(--border);
-      font-size: 14px;
+      background-color: var(--wash);
       outline: none;
-      cursor: pointer;
+      transition: all 0.1s ease;
+      &:hover {
+        border: 1px solid rgba(64, 0, 255, 0.3);
+      }
+      &:focus {
+        border: 1px solid rgba(64, 0, 255, 0.3);
+      }
     }
     select,
     select::picker(select) {
       appearance: base-select;
     }
+    select {
+     font-size: 14px;
+     color: var(--ink);
+    }
     select::picker(select) {
-      margin-top: 8px;
-      padding: 6px;
       border: 1px solid var(--line);
       border-radius: var(--border);
-      background-color: var(--paper);
-      box-shadow: var(--shadow-pop);
-      overflow: hidden;
+      margin-bottom: 10px;
+      margin-top: 10px;
+      padding: 5px;
     }
     select::picker-icon {
-      color: var(--ink-2);
-      transition: transform 0.2s ease;
+      color: var(--intl);
     }
     select:open::picker-icon {
+      transition: all 0.3s ease;
       transform: rotate(180deg);
     }
-    option {
-      padding: 10px 12px;
-      border-radius: 8px;
+    select option {
+      width: 100%;
       background-color: var(--paper);
-      color: var(--ink);
+      border-radius: 4px;
+      padding: 4px 4px;
+      &:hover {
+        background-color: rgba(0, 55, 255, 0.15);
+      }
+      &:active {
+        background-color: rgb(124, 58, 237, 2);
+        color: var(--accent-soft);
+      }
+      &:checked {
+        background-color: rgb(124, 58, 237, 2);
+        color: var(--accent-soft);
+      }
     }
-    option:hover,
-    option:focus {
-      background-color: var(--accent-soft);
-      color: var(--accent);
+    option img {
+      width: 16px;
+      height: 16px;
     }
-    option:chacked {
-      background-color: var(--accent-soft);
-      color: var(--accent);
+    button {
+      width: 100%;
+      padding: 10px 10px;
+      border: none;
+      outline: none;
+      background-color: #0f172a;
+      color: var(--accent-soft);
+      font-weight: 600;
+      border-radius: var(--border);
+      transition: all 0.2s ease;
+      &:hover {
+        background-color: #1e293b;
+        scale: 1.03;
+      }
+      &:active {
+        background-color: #334155;
+        scale: 0.97;
+      }
     }
+
+   
 
 
 
@@ -211,11 +250,16 @@
   </div>
   <div class="inputBox">
     <h2>Filup Form</h2>
+    <input value type="name" placeholder="Enter your name"/>
+    <input value type="email" placeholder="Enter your e-mail"/>
     <select>
-      <option>Select the items</option>
-      <option>APIV2</option>
-      <option>APIV3</option>
+      <option>Select the SIM</option>
+      <option><img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/airtel-logo-icon.png"/>Airtel</option>
+      <option><img src="https://cdn.brandfetch.io/idqLAdXx8e/theme/dark/logo.svg?c=1bxid64Mup7aczewSAYMX&t=1778714794509"/>Robi</option>
+      <option><img src="https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-thumbnail/s3/052014/graamiinnphon.png?itok=46ZJZ5Gf" />Garameenphone</option>
+      <option><img src="https://images.seeklogo.com/logo-png/41/1/banglalink-logo-png_seeklogo-411075.png" />Banglalink</option>
     </select>
+    <button>Get Started</button>
   </div>
 
 </body>
