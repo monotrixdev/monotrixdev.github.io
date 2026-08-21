@@ -118,3 +118,84 @@ body {
     font-size: 16px;
     color: var(--text-muted);
 }
+
+button {
+  width: 100%;
+  padding: 0.3rem;
+  margin-top: 15px;
+  background-color: var(--foreground);
+  color: var(--background);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  outline: none;
+  border-radius: var(--radius);
+  gap: 4px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    background-color: rgb(8, 8, 8, 0.8);
+    scale: 1.03;
+  }
+  &:active {
+    background-color: rgba(8, 8, 8);
+    scale: 0.97;
+  }
+}
+
+.timeline {
+  width: 100%;
+  display: flex;
+}
+.time-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.content {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0.6rem 1.2rem;
+  gap: 4px;
+  border-left: 1px dashed var(--border);
+}
+.content h2 {
+  font-weight: 500;
+  margin: 0;
+  font-size: 0.9rem;
+}
+.content p {
+  font-weight: 300;
+  margin: 0;
+  font-size: 0.8rem;
+}
+.content::before {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background-color: #64748b;
+  border-radius: 50px;
+  left: -3px;
+  top: 16px;
+  box-shadow: 0 0 0 6px rgb(37 99 235 / 15%);
+}
+.active.content::before {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  left: -7.5px;
+  border-radius: 50px;
+  top: 12px;
+  background-color: var(--accent);
+  border: 3px solid var(--background);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 15%);
+}
